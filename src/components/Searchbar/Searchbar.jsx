@@ -1,19 +1,45 @@
-export function Searchbar({ onSubmit }) {
-  return (
-    <header className="searchbar">
-      <form className="form" onSubmit={onSubmit()}>
-        <button type="submit" className="button">
-          <span className="button-label">Search</span>
-        </button>
+import { Component } from 'react';
 
-        <input
-          className="input"
-          type="text"
-          //   autocomplete="off"
-          //   autofocus
-          placeholder="Search images and photos"
-        />
-      </form>
-    </header>
-  );
+export class Searchbar extends Component {
+  state = {
+    value: '',
+  };
+
+  handledInputChange = e => {
+    this.setState({
+      value: e.currentTarget.value.toLowerCase(),
+    });
+  };
+
+  handleSubmit = e => {
+    e.preventDefault();
+    this.props.onSubmit(this.state.value);
+  };
+
+  render() {
+    return (
+      <header
+      // className={s.searchbar}
+      >
+        <form className="form" onSubmit={this.handleSubmit}>
+          <button
+            type="submit"
+            // className={s.buttonIcon}
+          >
+            Search
+          </button>
+
+          <input
+            onChange={this.handledInputChange}
+            value={this.state.value}
+            // className={s.input}
+            type="text"
+            autoComplete="off"
+            autoFocus
+            placeholder="Search images and photos"
+          />
+        </form>
+      </header>
+    );
+  }
 }
