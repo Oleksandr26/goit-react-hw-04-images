@@ -1,13 +1,12 @@
 import { ImageGalleryItem } from '../ImageGalleryItem/ImageGalleryItem';
+import s from './ImageGallery.module.css';
 
 export function ImageGallery({ hits, onItemClick }) {
-  console.log('hits: ', hits);
-  const elements = hits.map(element => (
-    <ImageGalleryItem
-      key={element.id}
-      {...element}
-      onImageClick={onItemClick}
-    />
-  ));
-  return <ul>{elements}</ul>;
+  return (
+    <ul className={s.imageGallery}>
+      {hits.map(hit => (
+        <ImageGalleryItem key={hit.id} {...hit} onImageClick={onItemClick} />
+      ))}
+    </ul>
+  );
 }
