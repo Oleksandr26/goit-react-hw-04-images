@@ -4,14 +4,14 @@ import PropTypes from 'prop-types';
 
 export class Modal extends Component {
   componentDidMount() {
-    window.addEventListener('keydown', this.onCloseByEscape);
+    window.addEventListener('keydown', this.onCloseByEsc);
   }
 
   componentWillUnmount() {
-    window.removeEventListener('keydown', this.onCloseByEscape);
+    window.removeEventListener('keydown', this.onCloseByEsc);
   }
 
-  onCloseByEscape = e => {
+  onCloseByEsc = e => {
     if (e.code === 'Escape') {
       this.props.onClose();
     }

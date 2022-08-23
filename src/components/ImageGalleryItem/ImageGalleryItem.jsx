@@ -14,7 +14,7 @@ export function ImageGalleryItem({
     >
       <img
         className={s.image}
-        width="350"
+        width="300"
         src={webformatURL}
         alt={tags}
         loading="lazy"

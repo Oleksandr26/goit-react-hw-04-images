@@ -2,10 +2,9 @@ import { Component } from 'react';
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { ImgAPI } from './services/API';
-
 import { Button } from './Button/Button';
-// import { Loader } from './Loader/Loader';
 import { Modal } from './Modal/Modal';
+import { Loader } from './Loader/Loader';
 import s from './App.module.css';
 import 'modern-normalize/modern-normalize.css';
 
@@ -27,14 +26,13 @@ export class App extends Component {
       prevState.currentPage !== currentPage
     ) {
       this.fetchImg(searchTerm, currentPage);
-      console.log(prevState.searchTerm !== searchTerm);
     }
-    // if (currentPage > 1) {
-    //   window.scrollBy({
-    //     top: window.innerHeight - 140,
-    //     behavior: 'smooth',
-    //   });
-    // }
+    if (currentPage > 1) {
+      window.scrollBy({
+        top: window.innerHeight - 140,
+        behavior: 'smooth',
+      });
+    }
   }
 
   handleSubmit = query => {
@@ -57,12 +55,10 @@ export class App extends Component {
         searchTerm,
         currentPage
       );
-      console.log('hits: ', hits);
       this.setState(({ img }) => ({
         img: [...img, ...hits],
         totalPages: total / totalHits,
       }));
-      console.log('totalPages: ', this.state.totalPages);
     } catch (error) {
       this.setState({ error: error.message });
     } finally {
@@ -76,7 +72,6 @@ export class App extends Component {
     this.setState(prevState => ({
       currentPage: prevState.currentPage + 1,
     }));
-    console.log(this.state.currentPage);
   };
 
   openModal = (url, alt) => {
@@ -93,14 +88,10 @@ export class App extends Component {
   };
 
   render() {
-    const { img, totalPages, currentPage, isLoading, error, url, alt } =
-      this.state;
+    const { img, totalPages, currentPage, isLoading, url, alt } = this.state;
     return (
       <div className={s.App}>
-        <Searchbar onSubmit={this.handleSubmit}>
-          {error && <div className="error">{error}</div>}
-          {isLoading && <div className="loading">Loading...</div>}
-        </Searchbar>
+        <Searchbar onSubmit={this.handleSubmit}></Searchbar>
         <ImageGallery hits={img} onItemClick={this.openModal} />
         {totalPages >= currentPage && <Button onClick={this.handleLoadMore} />}
         {url && (
@@ -108,6 +99,7 @@ export class App extends Component {
             <img src={url} alt={alt} />
           </Modal>
         )}
+        {isLoading && <Loader />}
       </div>
     );
   }
