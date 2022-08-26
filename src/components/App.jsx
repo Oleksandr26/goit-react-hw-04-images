@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { ImgAPI } from './services/API';
@@ -17,30 +17,8 @@ export function App() {
   const [totalPages, setTotalPages] = useState(0);
   const [imgRef, setImgRef] = useState({ url: '', alt: '' });
 
-  useEffect(() => {
-    if (searchTerm === null || currentPage === 1) return;
-    fetchImg(searchTerm, currentPage);
-
-    // if (currentPage > 1) {
-    //   window.scrollBy({
-    //     top: window.innerHeight - 140,
-    //     behavior: 'smooth',
-    //   });
-    // }
-  });
-
-  const handleSubmit = query => {
-    if (!query.trim() || searchTerm === query) return;
-    setSearchTerm(query);
-    setCurrentPage(1);
-    setImg([]);
-    setTotalPages(0);
-  };
-
-  const fetchImg = async (searchTerm, currentPage) => {
-    setIsLoading({
-      isLoading: true,
-    });
+  const fetchImg = useCallback(async (searchTerm, currentPage) => {
+    setIsLoading(true);
 
     try {
       const { hits, total, totalHits } = await ImgAPI.searchImg(
@@ -48,14 +26,25 @@ export function App() {
         currentPage
       );
       setImg(img => [...img, ...hits]);
-      setCurrentPage(total / totalHits);
+      setTotalPages(total / totalHits);
     } catch (error) {
       setError(error.message);
     } finally {
-      setIsLoading({
-        isLoading: false,
-      });
+      setIsLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    if (searchTerm === null && currentPage === 1) return;
+    fetchImg(searchTerm, currentPage);
+  }, [currentPage, searchTerm, fetchImg, error]);
+
+  const handleSubmit = query => {
+    if (!query.trim() || searchTerm === query) return;
+    setSearchTerm(query);
+    setCurrentPage(1);
+    setImg([]);
+    // setTotalPages(0);
   };
 
   const handleLoadMore = () => {
@@ -69,11 +58,11 @@ export function App() {
     });
   };
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setImgRef({
       url: '',
     });
-  };
+  }, []);
 
   // const { url, alt } = imgRef;
   return (
