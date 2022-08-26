@@ -1,35 +1,40 @@
-import { Component } from 'react';
+import { useEffect, useCallback } from 'react';
 import s from './Modal.module.css';
 import PropTypes from 'prop-types';
 
-export class Modal extends Component {
-  componentDidMount() {
-    window.addEventListener('keydown', this.onCloseByEsc);
-  }
+export function Modal({ onClose, children }) {
+  const onCloseByEsc = useCallback(
+    e => {
+      if (e.code === 'Escape') {
+        onClose();
+      }
+    },
+    [onClose]
+  );
 
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.onCloseByEsc);
-  }
+  useEffect(() => {
+    window.addEventListener('keydown', onCloseByEsc);
+    return () => window.removeEventListener('keydown', onCloseByEsc);
+  }, [onCloseByEsc]);
+  // componentDidMount() {
+  //   window.addEventListener('keydown', this.onCloseByEsc);
+  // }
 
-  onCloseByEsc = e => {
-    if (e.code === 'Escape') {
-      this.props.onClose();
-    }
-  };
+  // componentWillUnmount() {
+  //   window.removeEventListener('keydown', this.onCloseByEsc);
+  // }
 
-  onBackDrop = e => {
+  const onBackDrop = e => {
     if (e.currentTarget === e.target) {
-      this.props.onClose();
+      onClose();
     }
   };
 
-  render() {
-    return (
-      <div className={s.overlay} onClick={this.onBackDrop}>
-        <div className={s.modal}>{this.props.children}</div>
-      </div>
-    );
-  }
+  return (
+    <div className={s.overlay} onClick={onBackDrop}>
+      <div className={s.modal}>{children}</div>
+    </div>
+  );
 }
 
 Modal.propTypes = {

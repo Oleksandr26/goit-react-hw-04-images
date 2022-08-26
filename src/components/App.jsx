@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { ImgAPI } from './services/API';
@@ -8,45 +8,37 @@ import { Loader } from './Loader/Loader';
 import s from './App.module.css';
 import 'modern-normalize/modern-normalize.css';
 
-export class App extends Component {
-  state = {
-    img: [],
-    isLoading: false,
-    error: null,
-    currentPage: 1,
-    searchTerm: null,
-    totalPages: 0,
+export function App() {
+  const [img, setImg] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState(null);
+  const [totalPages, setTotalPages] = useState(0);
+  const [imgRef, setImgRef] = useState({ url: '', alt: '' });
+
+  useEffect(() => {
+    if (searchTerm === null || currentPage === 1) return;
+    fetchImg(searchTerm, currentPage);
+
+    // if (currentPage > 1) {
+    //   window.scrollBy({
+    //     top: window.innerHeight - 140,
+    //     behavior: 'smooth',
+    //   });
+    // }
+  });
+
+  const handleSubmit = query => {
+    if (!query.trim() || searchTerm === query) return;
+    setSearchTerm(query);
+    setCurrentPage(1);
+    setImg([]);
+    setTotalPages(0);
   };
 
-  componentDidUpdate(_, prevState) {
-    const { searchTerm, currentPage } = this.state;
-
-    if (
-      prevState.searchTerm !== searchTerm ||
-      prevState.currentPage !== currentPage
-    ) {
-      this.fetchImg(searchTerm, currentPage);
-    }
-    if (currentPage > 1) {
-      window.scrollBy({
-        top: window.innerHeight - 140,
-        behavior: 'smooth',
-      });
-    }
-  }
-
-  handleSubmit = query => {
-    if (!query.trim() || this.state.searchTerm === query) return;
-    this.setState({
-      searchTerm: query,
-      currentPage: 1,
-      img: [],
-      totalPages: 0,
-    });
-  };
-
-  fetchImg = async (searchTerm, currentPage) => {
-    this.setState({
+  const fetchImg = async (searchTerm, currentPage) => {
+    setIsLoading({
       isLoading: true,
     });
 
@@ -55,52 +47,46 @@ export class App extends Component {
         searchTerm,
         currentPage
       );
-      this.setState(({ img }) => ({
-        img: [...img, ...hits],
-        totalPages: total / totalHits,
-      }));
+      setImg(img => [...img, ...hits]);
+      setCurrentPage(total / totalHits);
     } catch (error) {
-      this.setState({ error: error.message });
+      setError(error.message);
     } finally {
-      this.setState({
+      setIsLoading({
         isLoading: false,
       });
     }
   };
 
-  handleLoadMore = () => {
-    this.setState(prevState => ({
-      currentPage: prevState.currentPage + 1,
-    }));
+  const handleLoadMore = () => {
+    setCurrentPage(prevState => prevState + 1);
   };
 
-  openModal = (url, alt) => {
-    this.setState({
+  const openModal = (url, alt) => {
+    setImgRef({
       url: url,
       alt: alt,
     });
   };
 
-  closeModal = () => {
-    this.setState({
+  const closeModal = () => {
+    setImgRef({
       url: '',
     });
   };
 
-  render() {
-    const { img, totalPages, currentPage, isLoading, url, alt } = this.state;
-    return (
-      <div className={s.App}>
-        <Searchbar onSubmit={this.handleSubmit}></Searchbar>
-        <ImageGallery hits={img} onItemClick={this.openModal} />
-        {totalPages >= currentPage && <Button onClick={this.handleLoadMore} />}
-        {url && (
-          <Modal onClose={this.closeModal}>
-            <img src={url} alt={alt} />
-          </Modal>
-        )}
-        {isLoading && <Loader />}
-      </div>
-    );
-  }
+  // const { url, alt } = imgRef;
+  return (
+    <div className={s.App}>
+      <Searchbar onSubmit={handleSubmit}></Searchbar>
+      <ImageGallery hits={img} onItemClick={openModal} />
+      {totalPages >= currentPage && <Button onClick={handleLoadMore} />}
+      {imgRef.url && (
+        <Modal onClose={closeModal}>
+          <img src={imgRef.url} alt={imgRef.alt} />
+        </Modal>
+      )}
+      {isLoading && <Loader />}
+    </div>
+  );
 }
